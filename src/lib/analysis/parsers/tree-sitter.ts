@@ -1,21 +1,15 @@
 // Tree-sitter based function extraction using web-tree-sitter
 // This provides accurate AST-based function extraction for multiple languages
 
-import type { GraphNode } from "@/lib/graph-types";
 import type { ExtractedFunction } from "./functions";
 
 // Import web-tree-sitter
 import * as webTreeSitter from "web-tree-sitter";
 
 // Tree-sitter parser types
-interface TreeSitterLanguage {
-  // Tree-sitter Language object - using unknown as placeholder
-  _brand: "TreeSitterLanguage";
-}
-
 interface TreeSitterParser {
-  parse: (sourceCode: string) => TreeSitterTree;
-  setLanguage: (language: TreeSitterLanguage) => void;
+  parse: (sourceCode: string) => TreeSitterTree | null;
+  setLanguage: (language: webTreeSitter.Language) => void;
 }
 
 interface TreeSitterTree {
@@ -96,7 +90,10 @@ async function initTreeSitter(): Promise<void> {
 
   try {
     await webTreeSitter.Parser.init();
-    parser = new webTreeSitter.Parser();
+    // web-tree-sitter's Parser type is structurally incompatible with our
+    // TreeSitterParser interface in some TypeScript configurations. Cast to
+    // unknown first to satisfy the compiler, preserving runtime behavior.
+    parser = new webTreeSitter.Parser() as unknown as TreeSitterParser;
     initialized = true;
   } catch (error) {
     console.warn("Failed to initialize web-tree-sitter:", error);
@@ -121,7 +118,7 @@ async function loadLanguage(languageName: string): Promise<webTreeSitter.Languag
     if (!response.ok) {
       throw new Error(`Failed to fetch WASM: ${response.status}`);
     }
-    const wasmBytes = await response.arrayBuffer();
+    const wasmBytes = new Uint8Array(await response.arrayBuffer());
     const language = await webTreeSitter.Language.load(wasmBytes);
     loadedLanguages.set(languageName, language);
     return language;
@@ -177,6 +174,7 @@ export async function extractFunctionsWithTreeSitter(
   try {
     parser.setLanguage(loadedLanguage);
     const tree = parser.parse(content);
+    if (!tree) return [];
     const rootNode = tree.rootNode;
 
     const functions: ExtractedFunction[] = [];
@@ -188,7 +186,6 @@ export async function extractFunctionsWithTreeSitter(
         let name = "";
         let params: string[] = [];
         let isMethod = false;
-        const className = parentClassName;
 
         // Find the name node
         const nameNode = node.namedChildren.find(

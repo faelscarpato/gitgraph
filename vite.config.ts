@@ -14,4 +14,14 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === "EVAL" && warning.message.includes("web-tree-sitter")) {
+          return;
+        }
+        warn(warning);
+      },
+    },
+  },
 });
