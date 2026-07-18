@@ -1,0 +1,20 @@
+# Cloudflare Pages configuration for GenIA Analyzer
+# This file configures the project for deployment on Cloudflare Pages
+
+name = "genia-analyzer"
+compatibility_date = "2026-18-07"
+
+# For Cloudflare Pages with TanStack Start
+# Pages will automatically detect this as a static site
+
+[build]
+# TanStack Start builds to dist/ by default
+command = "npm run build"
+publish = "dist/client"
+
+[build.env]
+# Environment variables for build
+NODE_ENV = "production"
+
+# Cloudflare Pages will use the static output from dist/
+# No additional configuration needed for static sites

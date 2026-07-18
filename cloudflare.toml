@@ -1,0 +1,36 @@
+# Cloudflare Pages project configuration
+# Place this file in the root of your project
+
+# The name of your project
+name = "genia-analyzer"
+
+# The directory containing your static files
+publish = "dist/client"
+
+# The build command to run
+[build]
+command = "npm run build"
+
+# Environment variables for the build
+[build.env]
+NODE_ENV = "production"
+
+# For TanStack Start, we need to configure the server entry
+# This is handled automatically by the build process
+
+# Redirects and rewrites
+# For a single-page application (SPA), redirect all requests to index.html
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+# Cache settings
+[cache]
+# Cache static assets for a long time
+[cache.assets]
+max_age = "1y"
+
+# Don't cache HTML files
+[cache.html]
+max_age = "0"
