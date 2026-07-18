@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import type { Analysis } from "@/lib/graph-types";
-import { exportGraphML, exportHtml, exportJson, exportPng } from "@/lib/export";
+import {
+  exportGraphML,
+  exportHtml,
+  exportJson,
+  exportPng,
+  exportDot,
+  exportMermaid,
+} from "@/lib/export";
 import { generateShareUrl } from "@/lib/share";
 
 interface Props {
@@ -12,6 +19,8 @@ interface Props {
 const OPTIONS = [
   { key: "json", label: "JSON", hint: "Full data for AI agents" },
   { key: "graphml", label: "GraphML", hint: "For Gephi / yEd" },
+  { key: "dot", label: "DOT", hint: "Graphviz format" },
+  { key: "mmd", label: "Mermaid", hint: "For diagrams.dev / docs" },
   { key: "png", label: "PNG", hint: "Screenshot of graph" },
   { key: "html", label: "HTML", hint: "Shareable static report" },
   { key: "url", label: "URL", hint: "Shareable link" },
@@ -35,6 +44,8 @@ export function ExportMenu({ analysis, svgRef }: Props) {
   const handle = (key: (typeof OPTIONS)[number]["key"]) => {
     if (key === "json") exportJson(analysis);
     else if (key === "graphml") exportGraphML(analysis);
+    else if (key === "dot") exportDot(analysis);
+    else if (key === "mmd") exportMermaid(analysis);
     else if (key === "png") exportPng(svgRef.current, analysis);
     else if (key === "html") exportHtml(analysis);
     else if (key === "url") {

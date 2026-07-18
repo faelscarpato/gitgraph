@@ -87,8 +87,7 @@ export function exportPng(svg: SVGSVGElement | null, a: Analysis) {
 }
 
 export function exportDot(a: Analysis) {
-  const esc = (s: string) =>
-    s.replace(/[\\"]/g, (c) => ({ "\\": "\\\\", '"': '\\"' })[c]!);
+  const esc = (s: string) => s.replace(/[\\"]/g, (c) => ({ "\\": "\\\\", '"': '\\"' })[c]!);
 
   const nodeGroups = new Map<string, string[]>();
 
@@ -143,13 +142,26 @@ export function exportDot(a: Analysis) {
 }
 
 export function exportMermaid(a: Analysis) {
-  const esc = (s: string) =>
-    s.replace(/[^a-zA-Z0-9_]/g, (c) => `_${c.charCodeAt(0)}_`);
+  const esc = (s: string) => s.replace(/[^a-zA-Z0-9_]/g, (c) => `_${c.charCodeAt(0)}_`);
 
   const nodeDefs: string[] = [];
   for (const n of a.nodes) {
-    const shape = n.kind === "function" ? n.functionData?.isMethod ? "([" : "(" : n.kind === "module" ? "(((" : "[";
-    const close = n.kind === "function" ? n.functionData?.isMethod ? ")]" : ")" : n.kind === "module" ? ")))" : "]";
+    const shape =
+      n.kind === "function"
+        ? n.functionData?.isMethod
+          ? "(["
+          : "("
+        : n.kind === "module"
+          ? "((("
+          : "[";
+    const close =
+      n.kind === "function"
+        ? n.functionData?.isMethod
+          ? ")]"
+          : ")"
+        : n.kind === "module"
+          ? ")))"
+          : "]";
     nodeDefs.push(`    ${esc(n.id)}${shape}${n.label}${close}`);
   }
 
