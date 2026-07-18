@@ -7,6 +7,7 @@ import {
   functionsToNodes,
   extractFunctionCalls,
 } from "./parsers/functions";
+import { extractFunctionsWithTreeSitter } from "./parsers/tree-sitter";
 
 const ENTRYPOINT_PATTERNS = [
   /^src\/(main|index)\.(ts|tsx|js|jsx)$/,
@@ -81,7 +82,16 @@ export async function buildGraph(files: FileEntry[]): Promise<PartialAnalysis> {
     if (!f.content) continue;
 
     const lang = detectLanguage(f.path) || "";
-    const functions = extractFunctionsFromCode(f.path, f.content, lang);
+
+    // Try Tree-sitter first for accurate AST-based extraction
+    let functions: Awaited<ReturnType<typeof extractFunctionsWithTreeSitter>>;
+    try {
+      functions = await extractFunctionsWithTreeSitter(f.path, f.content, lang);
+    } catch {
+      // Fallback to regex-based extraction
+      functions = extractFunctionsFromCode(f.path, f.content, lang);
+    }
+
     const funcNodes = functionsToNodes(functions);
 
     for (const funcNode of funcNodes) {

@@ -86,6 +86,97 @@ export function exportPng(svg: SVGSVGElement | null, a: Analysis) {
   img.src = url;
 }
 
+export function exportDot(a: Analysis) {
+  const esc = (s: string) =>
+    s.replace(/[\\"]/g, (c) => ({ "\\": "\\\\", '"': '\\"' })[c]!);
+
+  const nodeGroups = new Map<string, string[]>();
+
+  for (const n of a.nodes) {
+    const cluster = n.group ?? "default";
+    if (!nodeGroups.has(cluster)) nodeGroups.set(cluster, []);
+    const attrs = [
+      `label="${esc(n.label)}"`,
+      `kind="${n.kind}"`,
+      n.loc != null ? `loc=${n.loc}` : "",
+      n.complexity != null ? `complexity=${n.complexity}` : "",
+      n.language ? `language="${n.language}"` : "",
+      n.entrypoint ? "entrypoint=true" : "",
+    ]
+      .filter(Boolean)
+      .join(", ");
+    nodeGroups.get(cluster)!.push(`    "${esc(n.id)}" [${attrs}]`);
+  }
+
+  const edgeLines: string[] = [];
+  for (const e of a.edges) {
+    edgeLines.push(
+      `    "${esc(e.source)}" -> "${esc(e.target)}" [label="${e.kind}", weight=${e.weight}]`,
+    );
+  }
+
+  let dot = `// GenIA Analyzer · ${a.owner}/${a.repo} @ ${a.branch}\n`;
+  dot += `// quality=${a.quality} · ${a.nodes.length} nodes · ${a.edges.length} edges\n`;
+  dot += `digraph "${esc(a.repo)}" {\n`;
+  dot += `  graph [rankdir=LR, splines=ortho, bgcolor="#0d1424", fontname="Inter"]\n`;
+  dot += `  node [shape=box, style=filled, fillcolor="#1e2a44", color="#3b5998", fontname="Inter"]\n`;
+  dot += `  edge [color="#4a6fa5", fontname="Inter"]\n\n`;
+
+  for (const [cluster, nodes] of nodeGroups) {
+    if (cluster !== "default") {
+      dot += `  subgraph "cluster_${esc(cluster)}" {\n`;
+      dot += `    label="${esc(cluster)}"\n`;
+      dot += `    color="#3b5998"\n`;
+      dot += `    style=filled\n`;
+      dot += `    fillcolor="#111a2e"\n\n`;
+      dot += nodes.join("\n") + "\n";
+      dot += `  }\n\n`;
+    } else {
+      dot += nodes.join("\n") + "\n";
+    }
+  }
+
+  dot += `\n  ${edgeLines.join("\n  ")}\n`;
+  dot += "}\n";
+
+  download(`${a.repo}-${a.branch}.dot`, dot, "text/plain");
+}
+
+export function exportMermaid(a: Analysis) {
+  const esc = (s: string) =>
+    s.replace(/[^a-zA-Z0-9_]/g, (c) => `_${c.charCodeAt(0)}_`);
+
+  const nodeDefs: string[] = [];
+  for (const n of a.nodes) {
+    const shape = n.kind === "function" ? n.functionData?.isMethod ? "([" : "(" : n.kind === "module" ? "(((" : "[";
+    const close = n.kind === "function" ? n.functionData?.isMethod ? ")]" : ")" : n.kind === "module" ? ")))" : "]";
+    nodeDefs.push(`    ${esc(n.id)}${shape}${n.label}${close}`);
+  }
+
+  const edgeLines: string[] = [];
+  const edgeStyle = new Map<string, string>();
+  edgeStyle.set("import", "-->");
+  edgeStyle.set("call", "==>");
+  edgeStyle.set("config", "-.->");
+
+  for (const e of a.edges) {
+    const style = edgeStyle.get(e.kind) ?? "-->";
+    edgeLines.push(`    ${esc(e.source)} ${style} ${esc(e.target)}`);
+  }
+
+  const mmd = `%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e2a44', 'primaryTextColor': '#e6ecf5', 'primaryBorderColor': '#3b5998', 'lineColor': '#4a6fa5', 'secondaryColor': '#111a2e' }}}%%
+graph TD
+    %% GenIA Analyzer · ${a.owner}/${a.repo} @ ${a.branch}
+    %% quality=${a.quality} · ${a.nodes.length} nodes · ${a.edges.length} edges
+
+${nodeDefs.join("\n")}
+
+${edgeLines.join("\n")}
+`;
+
+  download(`${a.repo}-${a.branch}.mmd`, mmd, "text/plain");
+}
+
 export function exportHtml(a: Analysis) {
   const data = JSON.stringify(a).replace(/</g, "\\u003c");
   const warnings = (a.metrics.warnings ?? []).map((w) => `<li>${w}</li>`).join("");
