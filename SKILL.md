@@ -13,7 +13,7 @@ de tokens de contexto.
 
 ## URL da plataforma
 
-https://digigraph.pages.dev
+https://gitgraph.pages.dev/
 
 ## Como você deve usar esta plataforma
 
@@ -83,7 +83,7 @@ A plataforma faz todo o processamento por você.
 Usuário: "Analise meu repositório github.com/meu-usuario/meu-projeto"
 
 Você:
-1. Acessa https://digigraph.pages.dev
+1. Acessa https://gitgraph.pages.dev/
 2. Cola o link na plataforma
 3. Aguarda o JSON de saída
 4. Responde com base no JSON
