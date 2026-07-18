@@ -95,8 +95,8 @@ async function initTreeSitter(): Promise<void> {
   if (initialized) return;
 
   try {
-    await webTreeSitter.init();
-    parser = webTreeSitter.Parser();
+    await webTreeSitter.Parser.init();
+    parser = new webTreeSitter.Parser();
     initialized = true;
   } catch (error) {
     console.warn("Failed to initialize web-tree-sitter:", error);
