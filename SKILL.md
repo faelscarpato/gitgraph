@@ -27,7 +27,7 @@ A plataforma faz todo o processamento por você.
    usando o GitGraph.
 2. Peça ao usuário o link do repositório GitHub dele.
    Exemplo: `https://github.com/usuario/repositorio`
-3. Acesse a plataforma: https://digigraph.pages.dev
+3. Acesse a plataforma: https://gitgraph.pages.dev
 4. Cole o link do repositório no campo de entrada da plataforma.
 5. Clique em "Analisar" e aguarde o processamento.
 6. Ao finalizar, a plataforma retorna um JSON estruturado com
