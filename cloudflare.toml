@@ -1,0 +1,3 @@
+# Cloudflare Pages build configuration
+# The actual build command and output dir are configured in the Cloudflare dashboard
+# (or via wrangler.toml). This file is a no-op placeholder kept for compatibility.
