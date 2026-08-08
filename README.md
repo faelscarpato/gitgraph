@@ -1,110 +1,108 @@
-# mrcp-engine
+# 🕸️ GitGraph
 
-Machine-Readable Context Protocol Engine
+> Turn any repository into an interactive knowledge graph. Understand codebases, analyze complexity, compare versions, and run semantic queries seamlessly.
 
-# SPECIFICATION PAPER: The Machine-Readable Context Protocol (MRCP)
-
-**Um Middleware de Estruturação Semântica para Otimização de LLMs**
-
-## Resumo Executivo (Abstract)
-
-Atualmente, Modelos de Linguagem de Grande Escala (LLMs) gastam ciclos computacionais massivos processando dados não estruturados (HTML cru, repositórios de código inteiros, PDFs complexos). Isso resulta em janelas de contexto saturadas, altos custos de inferência (tokens) e degradação de atenção, levando à alucinação de dados. Este documento propõe a arquitetura **MRCP**, um motor de pré-processamento que atua como um _Gatekeeper_ e Tradutor. Ele ingere qualquer fonte de dados (Código, Web, Documentos) e devolve para a IA um JSON altamente estruturado, mastigado e semântico, operando no padrão de "Divulgação Progressiva" (Progressive Disclosure).
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Vite](https://img.shields.io/badge/Vite-6.x-64748B?logo=vite)](https://vitejs.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![TanStack Router](https://img.shields.io/badge/TanStack-Router-FF4154?logo=react)](https://tanstack.com/router)
 
 ---
 
-## 1. O Problema do Paradigma Atual
+## 🚀 Overview
 
-Quando uma IA é solicitada a analisar um repositório GitHub, varrer um site ou ler um contrato, o fluxo padrão força o LLM a atuar como um _parser_. A IA recebe milhares de linhas de código, tags HTML inúteis ou textos extraídos sem formatação geométrica.
+**GitGraph** is a cutting-edge, browser-native static analysis engine designed to transform abstract codebases into structured, multi-dimensional knowledge graphs. By utilizing AST-level parsing through **Tree-Sitter**, it map modules, functions, and imports to deliver deep insights into software architecture, metrics tracking, and codebase evolution.
 
-- **Desperdício de Tokens:** 80% do texto em um arquivo HTML ou repositório (node_modules, logs, boilerplate) é lixo cognitivo para a IA.
-- **Efeito "Lost in the Middle":** Contextos muito longos fazem com que a IA esqueça instruções cruciais que ficaram no meio do prompt.
-- **Alucinação Arquitetural:** Ao ler muitos arquivos soltos, a IA falha em mapear as dependências corretas, inventando relações que não existem.
+Built completely on a modern frontend stack with **React**, **TypeScript**, **Shadcn/ui**, and optimized for low latency utilizing client-side databases (**IndexedDB**).
 
-## 2. A Arquitetura Proposta: O Motor Tradutor
+<img width="1366" height="644" alt="92c168f9-cb62-4fb7-a1f8-e9ee8703e1db" src="https://github.com/user-attachments/assets/b72f8cab-6a6b-4fcc-888c-aacf417b4cba" />
 
-A solução é retirar a carga de _parsing_ da IA e transferi-la para um microserviço dedicado. O motor atua em três camadas fundamentais:
+---
 
-### 2.1. Ingestão Multimodal
+## ✨ Features
 
-O motor é agnóstico em relação à fonte. Ele recebe um _endpoint_ e identifica a natureza do dado:
+- **⚡ High-Fidelity Graph Generation:** Extracts modules, components, configs, and single functions into interactive visualizations via a custom pipeline.
+- **🌳 AST & Language Parsing:** Powered by `tree-sitter`, parsing language-specific syntax structures to catch imports and function scopes programmatically.
+- **🤖 Semantic Search:** Run vectorized queries directly into your codebase graph layout via contextual embeddings.
+- **📊 Metric Dashboards & Insights:** Instantly calculate code complexity (Cyclomatic Complexity), Lines of Code (LOC), and hub-dependencies.
+- **🔄 Architectural Diffing:** Compare different structural versions of your repository analysis over time with full node/edge state tracking.
+- **💾 Local-First & Shareable:** Seamlessly stores previous maps inside IndexedDB and encodes graph footprints into shareable compressed URL links.
+- **📦 Multi-Format Export:** Export your software structure maps into `JSON`, `GraphML`, `PNG`, `DOT`, `Mermaid`, or standalone `HTML`.
 
-- **Repositórios:** Acessa a árvore de arquivos.
-- **Websites:** Executa _headless browsers_ para capturar o DOM.
-- **Documentos/Imagens:** Utiliza bibliotecas de OCR (Optical Character Recognition) aceleradas por hardware para extrair texto preservando a geometria da página.
+---
 
-### 2.2. Processamento Sintático (O Cérebro do Motor)
+## 🗺️ System Architecture
 
-Em vez de ler texto, o motor entende a estrutura.
+The codebase follows a strictly typed, modular architecture mapped around the decoupled route-driven approach of TanStack Router:
 
-- **Para Código:** Utiliza binários WebAssembly do `Tree-Sitter` para gerar Árvores de Sintaxe Abstrata (AST). Ele extrai apenas assinaturas de funções, classes e grafos de dependência (imports/exports).
-- **Para Web:** Remove CSS/Scripts e converte a semântica de `<h1>`, `<table>` e `<article>` para um Markdown limpo.
-- **Para Documentos (O Futuro):** Mapeia cláusulas de contratos, sumários de livros e verbetes de enciclopédias, convertendo PDFs blocados em arrays lógicos.
-
-### 2.3. O Padrão de Divulgação Progressiva (A "Lupa")
-
-A genialidade do protocolo reside em **não enviar tudo de uma vez**. A API responde em 4 a 7 segundos com um "Esqueleto Inteligente".
-
-```json
-{
-  "context_type": "repository",
-  "summary": "Projeto web modular com uso intensivo de banco de dados.",
-  "architecture": {
-    "src/lib/api.ts": { "exports": ["fetchData", "authenticate"] },
-    "src/components/ui/": { "type": "visual_components", "count": 24 }
-  },
-  "llm_action_required": "Para ler o conteúdo interno de um arquivo específico, chame o endpoint /analyze/deep-dive?path=[ARQUIVO]"
-}
 ```
 
-A IA recebe o mapa da mina. Se ela precisar ler um contrato específico ou a função `fetchData`, ela faz uma segunda chamada pontual.
+src/
+├── components/          # High-performance visual layers (GraphViewer, Metrics, Panels)
+│   └── ui/              # Atomized layout building blocks powered by Radix + Shadcn
+├── hooks/               # State lifecycles and responsive interfaces
+├── lib/                 # Core engine mechanics
+│   ├── analysis/        # Pipeline orchestrators, parsers (tree-sitter), and metrics engines
+│   ├── persistence/     # Local-first synchronization models (IndexedDB Store)
+│   └── providers/       # Agent configurations and remote resource controllers
+└── routes/              # Type-safe file-system routing ecosystem
 
----
-
-## 3. Escalabilidade e Infraestrutura
-
-Para suportar o tráfego de agentes autônomos sem gargalos, a arquitetura exige:
-
-- **Edge Computing & Serverless:** A lógica de _parsing_ deve rodar na borda (Edge) para latência quase zero.
-- **Caching Inteligente:** Integração com bancos de dados de alta performance (como instâncias no Supabase ou Redis) para salvar hashes de repositórios e sites. Se uma IA pedir a análise de um repositório que já foi processado há 1 hora, a API devolve o JSON salvo do banco de dados em milissegundos, poupando processamento.
-- **Aceleração de OCR:** Para a futura implementação de processamento de enciclopédias e PDFs volumosos, o motor poderá delegar o processamento de imagem para GPUs em nuvem (utilizando pipelines como as disponíveis no ecossistema NVIDIA Developer), transformando pixels em JSON semântico assincronamente.
-
----
-
-## 4. O Impacto Direto nas IAs (Por que deve ser um Padrão Nativo)
-
-Se os provedores de IA adotarem esse protocolo como uma ferramenta nativa (_Native Function Call_):
-
-1. **Redução de Custo de Inferência:** O processamento nos clusters das IAs cairá drasticamente, pois elas não gastarão mais poder computacional tentando entender estruturas sintáticas — o motor já fez isso.
-2. **Aumento Absoluto de Precisão:** A IA passa a responder perguntas sobre bases de código complexas ou documentos jurídicos longos com exatidão matemática, pois está consultando um banco de dados estruturado, não lendo um pergaminho infinito.
-3. **Velocidade para o Usuário Final:** Como o motor devolve o contexto tático em segundos, a interface de chat do usuário final parece ter ganho um aumento absurdo de velocidade e inteligência.
-
-## 5. Como conectar via MCP (Model Context Protocol)
-
-O MRCP-Engine possui suporte nativo ao padrão MCP (Model Context Protocol) para ser consumido instantaneamente por agentes como **Claude Desktop**, **Cursor**, **Gemini** e orquestradores de IA.
-
-### Opção A: Executando via NPX (Claude Desktop)
-Para adicionar o MRCP-Engine ao Claude Desktop, adicione o seguinte trecho no seu arquivo `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "mrcp-engine": {
-      "command": "npx",
-      "args": ["-y", "mrcp-engine"]
-    }
-  }
-}
 ```
 
-### Opção B: Conectando via API HTTP (SSE)
-Para agentes em nuvem ou bibliotecas como LangChain e LlamaIndex, o motor expõe um endpoint oficial de comunicação:
-- **URL do Servidor MCP:** `https://mrcp-engine.vercel.app/api/mcp`
+---
 
-### Opção C: Para o ChatGPT (OpenAI Custom Actions)
-Basta importar o Manifesto da OpenAPI no portal de criação de GPTs:
-- **Manifest URL:** `https://mrcp-engine.vercel.app/openapi.json`
+## 🛠️ Technology Stack
 
-## 6. Conclusão
+- **Bundler & Tooling:** [Vite](https://vitejs.dev/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Routing Architecture:** [TanStack Router](https://tanstack.com/router)
+- **Styling Engine:** Tailwind CSS + [Shadcn/ui](https://ui.shadcn.com/)
+- **State & Engine Persistence:** IndexedDB (Local Stores)
 
-O motor proposto não é apenas um "leitor de repositórios". É a fundação para a **Machine-Readable Web**. Ao entregar dados mastigados, estruturados e sob demanda, permitimos que as IAs deixem de ser leitoras braçais de código sujo e passem a operar exclusivamente no nível cognitivo avançado, tomando decisões arquiteturais, analisando lógica e gerando insights em tempo recorde.
+---
 
+## 🏁 Getting Started
+
+### Prerequisites
+
+Ensure you have [Node.js](https://nodejs.org/) (v18+ recommended) and `pnpm` / `npm` installed.
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/faelscarpato/gitgraph.git
+   cd gitgraph
+
+
+   ```
+2. **Install dependencies:**
+
+```bash
+pnpm install
+# or npm install
+
+```
+
+3. **Spin up the development server:**
+
+```bash
+pnpm dev
+# or npm run dev
+
+```
+
+4. **Build for production:**
+
+```bash
+pnpm build
+
+```
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
