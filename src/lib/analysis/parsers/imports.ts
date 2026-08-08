@@ -89,7 +89,6 @@ export function extractImports(path: string, content: string): ImportRef[] {
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
   const out: ImportRef[] = [];
 
-  // Helper to extract imports from regex patterns
   const extractFromPatterns = (
     patterns: RegExp[],
     isRelativeFn: (s: string) => boolean,
@@ -99,7 +98,6 @@ export function extractImports(path: string, content: string): ImportRef[] {
       let m;
       while ((m = re.exec(content)) !== null) {
         const raw = m[1];
-        // Skip empty matches
         if (!raw || raw.trim() === "") continue;
         out.push({ raw: raw.trim(), isRelative: isRelativeFn(raw) });
       }
@@ -212,6 +210,13 @@ export function extractImports(path: string, content: string): ImportRef[] {
       SQL_IMPORT_RE,
       (s) => s.startsWith(".") || s.startsWith("/"),
     );
+  } else if (ext === "html" || ext === "htm") {
+    // HTML assets (scripts, styles)
+    const HTML_IMPORT_RE = [
+      /src=["']([^"']+)["']/gi,
+      /href=["']([^"']+)["']/gi,
+    ];
+    extractFromPatterns(HTML_IMPORT_RE, (s) => true);
   }
 
   return out;
@@ -319,7 +324,8 @@ export function buildAliasMap(
     }
 
     const compilerOptions = cfg.compilerOptions as
-      Record<string, unknown> | undefined;
+      | Record<string, unknown>
+      | undefined;
     if (!compilerOptions) continue;
     const paths = compilerOptions.paths as Record<string, string[]> | undefined;
     if (!paths) continue;

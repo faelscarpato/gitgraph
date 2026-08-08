@@ -6,7 +6,7 @@ import {
   extractFunctionsWithTreeSitter,
   extractCallsWithTreeSitter,
   isTreeSitterAvailable,
-} from "./tree-sitter";
+} from "./tree-sitter.js";
 
 export interface ExtractedFunction {
   name: string;

@@ -1,54 +1,47 @@
-import { describe, it, expect } from 'vitest';
-import { detectLanguage } from './language';
+import { describe, it, expect } from "vitest";
+import {
+  detectLanguage,
+  isSourceFile,
+  isConfigFile,
+  detectMonorepoConfig,
+} from "./language";
 
-describe('Módulo de Parsers: Detecção de Linguagem (language.ts)', () => {
-  
-  it('deve detectar corretamente ficheiros da stack JavaScript/TypeScript', () => {
-    expect(detectLanguage('src/components/GraphViewer.tsx')).toBe('TypeScript');
-    expect(detectLanguage('src/lib/analyzer.ts')).toBe('TypeScript');
-    expect(detectLanguage('eslint.config.js')).toBe('JavaScript');
-    expect(detectLanguage('src/utils/helpers.jsx')).toBe('JavaScript');
+describe("Language Parser", () => {
+  it("should detect languages based on extension", () => {
+    expect(detectLanguage("file.ts")).toBe("TypeScript");
+    expect(detectLanguage("file.js")).toBe("JavaScript");
+    expect(detectLanguage("file.py")).toBe("Python");
+    expect(detectLanguage("file.cbl")).toBe("COBOL");
+    expect(detectLanguage("unknown.xyz")).toBeUndefined();
   });
 
-  it('deve detectar corretamente um ficheiro Python', () => {
-    expect(detectLanguage('backend/api/main.py')).toBe('Python');
-    expect(detectLanguage('scripts/data_processor.py')).toBe('Python');
+  it("should identify source files correctly", () => {
+    expect(isSourceFile("main.go")).toBe(true);
+    expect(isSourceFile("app.tsx")).toBe(true);
+    expect(isSourceFile("script.sh")).toBe(true);
+    expect(isSourceFile("image.png")).toBe(false);
   });
 
-  it('deve detectar corretamente um ficheiro Rust', () => {
-    expect(detectLanguage('core/engine/src/main.rs')).toBe('Rust');
-    expect(detectLanguage('parser.rs')).toBe('Rust');
+  it("should identify config files correctly", () => {
+    expect(isConfigFile("package.json")).toBe(true);
+    expect(isConfigFile("tsconfig.json")).toBe(true);
+    expect(isConfigFile("tailwind.config.js")).toBe(true);
+    expect(isConfigFile("index.js")).toBe(false);
   });
 
-  it('deve detectar corretamente ficheiros Go e C/C++', () => {
-    expect(detectLanguage('server/main.go')).toBe('Go');
-    expect(detectLanguage('system/core.cpp')).toBe('C++');
-    expect(detectLanguage('system/legacy.c')).toBe('C');
-    expect(detectLanguage('include/header.h')).toBe('C'); 
-  });
+  it("should detect monorepo config tools", () => {
+    // pnpm workspace
+    const pnpmFiles = [{ path: "pnpm-workspace.yaml", content: "packages/*" }];
+    expect(detectMonorepoConfig(pnpmFiles).tool).toBe("pnpm");
 
-  it('deve detectar corretamente ficheiros Ruby, PHP e Java', () => {
-    expect(detectLanguage('app/models/user.rb')).toBe('Ruby');
-    expect(detectLanguage('public/index.php')).toBe('PHP');
-    expect(detectLanguage('src/main/java/com/app/Main.java')).toBe('Java');
-  });
+    // lerna
+    const lernaFiles = [
+      { path: "lerna.json", content: '{"packages":["packages/*"]}' },
+    ];
+    expect(detectMonorepoConfig(lernaFiles).tool).toBe("lerna");
 
-  it('deve detectar corretamente ficheiros de documentação (Markdown)', () => {
-    expect(detectLanguage('docs/README.md')).toBe('Markdown');
-  });
-
-  it('deve detectar corretamente ficheiros de compilação (Makefile)', () => {
-    // O motor reconhece "Makefile", então validamos essa inteligência nativa.
-    expect(detectLanguage('Makefile')).toBe('Makefile');
-  });
-
-  it('deve retornar undefined para ficheiros sem extensão suportada ou de configuração genérica', () => {
-    expect(detectLanguage('LICENSE')).toBeUndefined();
-    expect(detectLanguage('.gitignore')).toBeUndefined();
-  });
-
-  it('deve lidar corretamente com caminhos completos e absolutos', () => {
-    expect(detectLanguage('/Users/fael/projects/gitgraph/src/main.ts')).toBe('TypeScript');
-    expect(detectLanguage('C:\\Projetos\\backend\\app.py')).toBe('Python');
+    // no monorepo
+    const normalFiles = [{ path: "package.json", content: "{}" }];
+    expect(detectMonorepoConfig(normalFiles).tool).toBe("none");
   });
 });

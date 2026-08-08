@@ -1,20 +1,8 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+// Removed UI plugin imports
 
 export default defineConfig({
-  plugins: [
-    tanstackStart({
-      server: { entry: "server" },
-      prerender: {
-        enabled: true,
-        crawlLinks: true,
-      },
-    }),
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [],
   resolve: {
     tsconfigPaths: true,
   },
@@ -30,5 +18,15 @@ export default defineConfig({
         warn(warning);
       },
     },
+  },
+  server: {
+    port: process.env.PORT ? parseInt(process.env.PORT) : 5173,
+    strictPort: !!process.env.PORT,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   },
 });
